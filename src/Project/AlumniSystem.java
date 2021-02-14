@@ -166,7 +166,7 @@ public class AlumniSystem {
                 return false;
             }
         }
-        if (user.getPassword().length() ==8) {
+        if (password.length() ==8) {
             return true;
         } else {
             System.out.println("Please make sure password is comprised of 8 characters");
