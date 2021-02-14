@@ -29,14 +29,6 @@ public class Ally extends User implements Mentoring{
         courses.add(newCourse);
     }
 
-    @Override
-    public void printDetails() {
-        System.out.println( "First name: " + firstName + System.lineSeparator() +
-                "Last Name: " + lastName + System.lineSeparator() +
-                "Mentoring: " + courses + System.lineSeparator() +
-                "LinkedIn Page: " + linkedinPage + System.lineSeparator() +
-                "Job search status: " + jobSearchStatus + System.lineSeparator());
-    }
 
     @Override
     public String toString() {

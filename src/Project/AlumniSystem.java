@@ -4,15 +4,16 @@ import java.util.*;
 
 public class AlumniSystem {
     private static User user;
-    static HashMap<String, User> hmap = new HashMap<>();
+    static HashMap<String, User> usersList = new HashMap<>();
     static boolean loggedIn;
     private static final Set<String> jobRequirements = new HashSet<>();
     public static String mentorCheck;
     static Scanner input = new Scanner(System.in);
 
+
     public static Alumni registerNewGrad(String firstName, String lastName, String[] courses) {
         Alumni alumni = new Alumni(firstName, lastName, courses);
-        hmap.put(alumni.getId(), alumni);
+        usersList.put(alumni.getId(), alumni);
         System.out.println("Alumni Id: " + alumni.getId());
         System.out.print("Temporary Password: ");
         System.out.print(alumni.getOtp());
@@ -21,7 +22,7 @@ public class AlumniSystem {
     }
     public static Mentor registerNewMentor(String firstName, String lastName, String[] courses) {
         Mentor mentor = new Mentor(firstName, lastName, courses);
-        hmap.put(mentor.getId(), mentor);
+        usersList.put(mentor.getId(), mentor);
         System.out.println("Alumni Id: " + mentor.getId());
         System.out.print("Temporary Password: ");
         System.out.print(mentor.getOtp());
@@ -30,7 +31,7 @@ public class AlumniSystem {
       }
     public static Ally registerNewAlly(String firstName, String lastName, String[] courses) {
         Ally ally = new Ally(firstName, lastName, courses);
-        hmap.put(ally.getId(), ally);
+        usersList.put(ally.getId(), ally);
         System.out.println("Alumni Id: " + ally.getId());
         System.out.print("Temporary Password: ");
         System.out.print(ally.getOtp());
@@ -48,11 +49,11 @@ public class AlumniSystem {
         System.out.println("Alumni ID: ");
         id = input.next();
 
-        while (!(hmap.containsKey(id))) {
+        while (!(usersList.containsKey(id))) {
             System.out.println("Alumni not found, please try again");
             id = input.next();
         }
-        user = hmap.get(id);
+        user = usersList.get(id);
         System.out.println("Password: ");
         password = input.next();
 
@@ -68,16 +69,15 @@ public class AlumniSystem {
     public static void updateDetails() {
         System.out.println("Hello, " + user.getFirstName() + "!");
 
-        //first login- must c0
-        // hange password
+        //first login- must change password
         if (user.getPassword().equals(user.getOtp())) {
-            user.setNewPassword();
+            setNewPassword();
         }
 
         while (loggedIn) {
             int choice;
 
-            user.printDetails();
+            printDetails();
 
             if (shouldOfferJob(jobRequirements)) {
                 System.out.println("You have a job offer! " + System.lineSeparator());
@@ -103,7 +103,7 @@ public class AlumniSystem {
             choice = input.nextInt();
             switch (choice) {
                 case 1:
-                    user.setNewPassword();
+                    setNewPassword();
                     break;
                 case 2:
                     String newCourse;
@@ -128,7 +128,7 @@ public class AlumniSystem {
                     System.out.println("LinkedIn page updated");
                     break;
                 case 4:
-                    user.setJobStatus();
+                    setJobStatus();
                     break;
                 case 0:
                     System.out.println("Logging out");
@@ -138,6 +138,61 @@ public class AlumniSystem {
                     System.out.println("Please choose one of the options");
             }
         }
+    }
+
+
+    //Methods
+
+
+    //checks password is comprised of 8 alphanumerical character
+    public static boolean checkPassword(String password) { //TODO move this to AlumniSystem
+        if (password.equals(user.getPassword()) || password.equals(user.getOtp())) {
+            System.out.println("can't use current or temporary password");
+            return false;
+        }
+        char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+        Arrays.sort(chars);
+        for (char p : password.toCharArray()) {
+            //ASCII characters
+            final int ZERO = 48;
+            final int NINE = 57;
+            final int A = 97;
+            final int Z = 122;
+            final int UPPER_A = 65;
+            final int UPPER_Z = 90;
+
+            if (!((p >= ZERO && p <= NINE) || (p >= A && p <= Z) || (p >= UPPER_A && p<= UPPER_Z))) {
+                System.out.println("Please make sure password is comprised only of alphanumerical characters");
+                return false;
+            }
+        }
+        if (user.getPassword().length() ==8) {
+            return true;
+        } else {
+            System.out.println("Please make sure password is comprised of 8 characters");
+            return false;
+        }
+    }
+
+
+    //update password (after checking it)
+    public static void setNewPassword() {
+        String newPassword;
+        System.out.println("Please enter new password:");
+        newPassword = input.next();
+        while (!(checkPassword(newPassword))) {
+            newPassword = input.next();
+        }
+        user.setPassword(newPassword);
+        System.out.println("Password updated \n");
+    }
+
+
+    public static void printDetails() {
+        System.out.println("First name: " + user.firstName + System.lineSeparator() +
+                "Last Name: " + user.lastName + System.lineSeparator() +
+                "LinkedIn Page: " + user.linkedinPage + System.lineSeparator() +
+                "Job search status: " + user.jobSearchStatus + System.lineSeparator());
     }
 
     // shouldOfferJob - returns true if the resume fits the requirements and the alumni is open for job offers, re-evaluates after details update
@@ -151,7 +206,34 @@ public class AlumniSystem {
         Collections.addAll(AlumniSystem.jobRequirements, jobRequirements);
     }
 
+    //lets user choose job search option and updates (boolean) whether she's open to job offers
+    public static void setJobStatus() {
 
+        System.out.println("Enter the number of the option most fitting your job status" + System.lineSeparator() +
+                "1." + "not looking for a change" + System.lineSeparator() +
+                "2."+ "not looking but open for suggestions" + System.lineSeparator() +
+                "3."+ "looking for a new challenge");
+        int choose = input.nextInt(); //TODO move this to AlumniSystem
+        switch(choose){
+            case 1:
+                user.setJobSearchStatus("not looking for a change");
+                System.out.println("your job status was set to: " + "not looking for a change");
+                user.setOpenForJobOffer(false);
+                break;
+            case 2:
+                user.setJobSearchStatus("not looking but open for suggestions");
+                System.out.println("your job status was set to: " + "not looking but open for suggestions");
+                user.setOpenForJobOffer(true);
+                break;
+            case 3:
+                user.setJobSearchStatus("looking for a new challenge");
+                System.out.println("Job status was set to: " + "looking for a new challenge");
+                user.setOpenForJobOffer(true);
+                break;
+            default:
+                System.out.println("Job status was not updated");
+        }
+    }
 
 }
 
